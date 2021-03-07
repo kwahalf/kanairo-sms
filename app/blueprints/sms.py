@@ -36,7 +36,7 @@ def send_dlr(data):
 
 @ns.route('/')
 @api.response(401, 'user is not authorized')
-class Bucketlists(Resource):
+class SMS(Resource):
     """this class handles the creation of an SMS send request"""
     @api.header('Authorization', 'JWT Token', required=True)
     @api.response(201, 'SMS request sucessfully created')
