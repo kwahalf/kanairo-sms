@@ -19,8 +19,8 @@ COPY . /kanairo-sms
 
 EXPOSE 5000
 
+WORKDIR /kanairo-sms
 
-CMD [ "python3", "manage.py", "db", "init" ]
-CMD [ "python3", "manage.py", "db", "migrate" ]
-CMD [ "python3", "manage.py", "db", "upgrade" ]
-CMD [ "python3", "manage.py", "runserver" ]
+RUN chmod u+x entry_point.sh
+RUN chmod u+x celery_entrypoint.sh
+CMD ["./entry_point.sh"]

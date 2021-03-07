@@ -1,12 +1,12 @@
 version: '3.5'
 
 services:
-  kanairo-sms: 
+  kanairo-sms-api: 
     image: kanairo-sms
     container_name: kanairo-api
     depends_on: [db, redis]
     ports:
-      - '80:5000'
+      - '4100:5000'
     environment:
       - SECRET="kwa00000000000.25"
       - APP_SETTINGS=production
@@ -14,6 +14,17 @@ services:
       - CELERY_BROKER_URL=redis://cache:6379/0
       - CELERY_RESULT_BACKEND=redis://cache:6379/0
       - FLASK_RUN_HOST=0.0.0.0
+
+  kanairo-clery-worker: 
+    image: kanairo-sms
+    container_name: kanairo-worker
+    depends_on: [db, redis]
+    environment:
+      - SECRET="kwa00000000000.25"
+      - APP_SETTINGS=production
+      - CELERY_BROKER_URL=redis://cache:6379/0
+      - CELERY_RESULT_BACKEND=redis://cache:6379/0
+    command: ./celery_entrypoint.sh
 
   redis: 
     image: redis
