@@ -3,7 +3,7 @@ import requests
 from flask import current_app
 from flask_restplus import Resource
 from flask import abort, request
-from app.blueprints.serializers import  api, sms
+from app.blueprints.serializers import  api, sms, sms_response
 from app.models import User
 from app import client
 
@@ -18,14 +18,14 @@ def send_dlr(data):
     with current_app.app_context():
         msg = {
             "id": data["id"],
-            "Status": random.choice(status_list),
+            "status": random.choice(status_list),
             "amount": "KES1.5"
         }
 
         request_headers = {"Accept": "application/json"}
         try:
             response = requests.post(
-                data["url"],
+                data["callback_url"],
                 data=msg,
                 headers=request_headers,
                 timeout=5,
@@ -41,7 +41,7 @@ class Bucketlists(Resource):
     @api.header('Authorization', 'JWT Token', required=True)
     @api.response(201, 'SMS request sucessfully created')
     @api.expect(sms)
-    @api.marshal_with(sms)
+    @api.marshal_with(sms_response)
     def post(self):
         """Handle POST request for this resource. Url ---> /sms/"""
         # Get the access token from the header
@@ -51,6 +51,8 @@ class Bucketlists(Resource):
                 # Attempt to decode the token and get the User ID
                 user_id = User.decode_token(access_token)
                 if not isinstance(user_id, str):
+                    post_data.update({"id": random.randint(1200, 30000), "status": "created"})
+                    send_dlr.apply_async(args=[post_data], countdown=10)
                     return post_data, 201
                 abort(401, user_id)
 
