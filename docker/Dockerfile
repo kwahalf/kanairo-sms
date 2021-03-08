@@ -1,21 +1,25 @@
-FROM ubuntu:18.04
+FROM python:3.6.9-slim-buster
 
 LABEL maintainer="Denis Juma kwanusud@gmail.com"
 
-RUN apt-get update -y && \
-    apt-get install -y python3 python3-dev python3-pip
+ENV BUILD_DEPS="build-essential" \
+    APP_DEPS="curl libpq-dev"
 
-# We copy just the requirements.txt first to leverage Docker cache
 COPY ./requirements.txt /kanairo-sms/requirements.txt
 
 WORKDIR /kanairo-sms
 
-RUN python3 -m pip install -U pip
-RUN python3 -m pip install -U setuptools
+RUN apt-get update \
+  && apt-get install -y ${BUILD_DEPS} ${APP_DEPS} --no-install-recommends \
+  && pip install -r requirements.txt --compile --no-cache-dir \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /usr/share/doc && rm -rf /usr/share/man \
+  && apt-get purge -y --auto-remove ${BUILD_DEPS} \
+  && apt-get clean
 
-RUN pip3 install -r requirements.txt
 
 COPY . /kanairo-sms
+
 
 EXPOSE 5000
 
